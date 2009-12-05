@@ -8,6 +8,28 @@ module Tarte
     #LEDO: add finders? add verifications?
     
     def has_one_baked_in(association_name, methods = nil)
+      names_constant = association_name.to_s.pluralize.upcase
+
+      class_eval <<-EOV
+        #{names_constant} = #{methods[:names].inspect}
+
+        def #{association_name}=(value)
+          self.#{association_name}_code = #{names_constant}.index(value)
+        end
+
+        def #{association_name}
+          #{names_constant}[#{association_name}_code]
+        end
+
+        def #{association_name}_was
+          #{names_constant}[self.#{association_name}_code_was]
+        end
+        
+        def #{association_name}_changed?
+          self.#{association_name}_code_changed?
+        end
+      EOV
+        
       methods[:names].each_with_index do |value, code|
         class_eval <<-EOV
           def #{value}
@@ -21,21 +43,20 @@ module Tarte
           def #{value}!
             update_attribute(:#{association_name}_code, #{code})
           end
-
-          def #{association_name}_changed_to_#{status}?
+          
+          def #{association_name}_changed_to_#{value}?
             self.#{association_name}_code_changed? && self.#{association_name}_code == #{code}
           end
         EOV
       end
       
-      alias_method "#{association_name}_code_changed?".to_sym, "#{association_name}_changed?".to_sym
     end
     
     def has_many_baked_in(association_name, methods = nil)
-      names_constant = association_name.upcase
+      names_constant = association_name.to_s.upcase
       methods[:verb] ||= :has
       class_eval <<-EOV
-        #{names_constant.upcase} = #{methods[:names]}
+        #{names_constant} = #{methods[:names].inspect}
       
         def #{association_name}=(values)
           self.#{association_name}_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v.to_sym) }.sum
@@ -46,8 +67,12 @@ module Tarte
           #{names_constant}.reject { |v| ((self.#{association_name}_mask || 0) & 2**#{names_constant}.index(v)).zero? }
         end
         
-        def #{association_name}_changed_to_#{status}?
-          self.#{association_name}_code_changed? && self.#{association_name}_code == #{code}
+        def #{association_name}_were
+          #{names_constant}.reject { |v| ((self.#{association_name}_mask_was || 0) & 2**#{names_constant}.index(v)).zero? }
+        end
+        
+        def #{association_name}_changed?
+          self.#{association_name}_mask_changed?
         end
       EOV
 
@@ -59,7 +84,6 @@ module Tarte
         EOV
       end
       
-      alias_method "#{association_name}_mask_changed?".to_sym, "#{association_name}_changed?".to_sym
     end
   end
   
