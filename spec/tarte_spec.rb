@@ -1,21 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-FakeModelParent.send(:include, Tarte)
-
-class ModelWithOne < ActiveRecord::Base
-  one_code = 1
-  has_one_baked_in(:one, :names => [:uno, :dos, :tres])
-end
-
-class ModelWithMany < ActiveRecord::Base
-  many_code = 3
-  has_many_baked_in(:many, :names => [:fish, :chips, :sauce])
-end
-
 describe Tarte, "accessors" do
   before(:each) do
     
-    # mock_model
   end
   
   it "should have accessors for an has_many_baked_in associations that hit an association_mask" do

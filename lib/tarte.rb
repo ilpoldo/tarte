@@ -1,6 +1,7 @@
-require 'tarte/model_methods'
+require 'tarte/baked_in_associations'
+ActiveRecord::Base.send(:include, Tarte)
 
 # LEDO: Should I require haml? Where: gemspec, loading the plugin or the view helper?
-module TARTE
+module Tarte
   VERSION = File.exist?('VERSION') ? File.read('VERSION') : ""
 end

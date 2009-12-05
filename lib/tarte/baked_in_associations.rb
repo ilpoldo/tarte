@@ -1,13 +1,11 @@
 module Tarte
   
-  def included(base)
-    raise base.inspect#DEBUG
-    base.extend BakedAssociations
+  def self.included(base)
+    base.extend BakedInAssociations
   end
   
-  module BakedAssociations
+  module BakedInAssociations
     #LEDO: add finders? add verifications?
-    
     
     def has_one_baked_in(association_name, methods = nil)
       methods[:names].each_with_index do |value, code|
@@ -66,5 +64,3 @@ module Tarte
   end
   
 end
-
-ActiveRecord::Base.send(:include, Tarte)
