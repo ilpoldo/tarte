@@ -29,7 +29,10 @@ module Tarte
           self.#{association_name}_code_changed?
         end
       EOV
-        
+      
+      #LEDO: Add a group options and quet methods and finders
+      
+      #LEDO: ADD scopes for finder methods
       methods[:names].each_with_index do |value, code|
         class_eval <<-EOV
           def #{value}
@@ -49,7 +52,6 @@ module Tarte
           end
         EOV
       end
-      
     end
     
     def has_many_baked_in(association_name, methods = nil)
@@ -60,7 +62,6 @@ module Tarte
       
         def #{association_name}=(values)
           self.#{association_name}_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v.to_sym) }.sum
-          raise(TartErrors::NotValidAssociationMask) if self.#{association_name}_mask >= #{names_constant.size}
         end
         
         def #{association_name}
@@ -76,6 +77,8 @@ module Tarte
         end
       EOV
 
+      #LEDO: ADD scopes for finder methods
+      # :conditions => ["attribute_mask & ? > 0", 2**index]
       methods[:names].each_with_index do |value, index|
         class_eval <<-EOV
           def #{methods[:verb]}_#{value}?
