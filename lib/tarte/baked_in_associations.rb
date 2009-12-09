@@ -35,7 +35,11 @@ module Tarte
         
         #LEDO: this group has to support group definitions
         def #{association_name}_codes_for(names)
-          names.map{|n| #{names_constant}.index(n)}
+          if names.class == Array
+            names.map{|n| #{names_constant}.index(n)}
+          else
+            #{names_constant}_GROUPS_CODES[names]
+          end
         end
       EOV
       
@@ -61,6 +65,11 @@ module Tarte
           end
         EOV
       end
+      
+      methods[:groups].each do |group, members|
+        
+      end
+      
     end
     
     def has_many_baked_in(association_name, methods = nil)
@@ -73,7 +82,7 @@ module Tarte
         #{names_constant} = #{methods[:names].inspect}
       
         def #{association_name}=(values)
-          new_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v.to_sym) }.sum
+          new_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v) }.sum
           raise(Tarte::Errors::NotValidAssociationMask) if new_mask >= #{2**methods[:names].size}
           
           self.#{association_name}_mask = new_mask
@@ -93,9 +102,14 @@ module Tarte
         
         #LEDO: this method has to support group definitions
         def #{association_name}_mask_for(names)
-          new_mask = (names & #{names_constant}).map { |v| 2**#{names_constant}.index(v.to_sym) }.sum
-          raise(Tarte::Errors::NotValidAssociationMask) if new_mask >= #{2**methods[:names].size}
-          new_mask
+          if names.class == Array
+            new_mask = (names & #{names_constant}).map { |v| 2**#{names_constant}.index(v.to_sym) }.sum
+            raise(Tarte::Errors::NotValidAssociationMask) if new_mask >= #{2**methods[:names].size}
+            new_mask
+          else
+            #{names_constant}_GROUPS_MASKS[names]
+          end
+          
         end
       EOV
 
@@ -108,6 +122,14 @@ module Tarte
           end
         EOV
       end
+      
+      # Converts arrays of options into masks.
+      hash_with_masks = methods[:groups].merge do |group, member_names|
+        (member_names & methods[:names]).map { |m| 2**methods[:names].index(m.to_sym) }.sum
+      end
+      class_eval <<-EOV
+        #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
+      EOV
       
     end
   end
