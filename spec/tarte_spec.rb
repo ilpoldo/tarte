@@ -9,7 +9,7 @@ end
 class HasManyIngredients < ActiveRecord::Base
   has_many_baked_in :ingredients, :names => [:fish, :chips, :sauce, :pudding], :groups => {:fish_and_chips => [:fish, :chips]}
   
-  validates_baked_in :ingredients, :matches => :fish_and_chips
+  validates_baked_in :ingredients, :matches => :fish_and_chips, :message => "I only like fish and chips"
 end
 
 describe Tarte, "accessors" do  
@@ -102,6 +102,18 @@ describe Tarte, "grouping and group querying" do
   it "should return mask for a group of has_many values for an attribute" do
     HasManyIngredients.ingredients_mask_for(:fish_and_chips).should eql(3)
   end
+  
+  it "should query if the attribute code matches a group" do
+    pending
+  end
+  
+  it "should query if the attribute mask matches a mask" do
+    pending
+  end
+  
+  it "should query if the attribute mask shares an element with a mask" do
+    pending
+  end
 end
 
 describe Tarte, "finder methods/scopes" do
@@ -124,18 +136,18 @@ describe Tarte, "validations using groups" do
     entry.save
   end
   
-  it "should pass when defined as valid" do
+  it "has_one should pass when created with valid attributes" do
     HasOneStatus.create!('status' => :red)
   end
   
   it "should validate has_many associations" do
     entry = HasManyIngredients.new    
-    entry.errors.should_receive(:add)
     entry.ingredients << :sauce
     entry.save
+    entry.errors.on(:ingredients).should eql("I only like fish and chips")
   end
   
-  it "should pass when defined as valid" do
+  it "has_many should pass when created with valid attributes" do
     HasManyIngredients.create!('ingredients' => [:fish, :chips])
   end
   

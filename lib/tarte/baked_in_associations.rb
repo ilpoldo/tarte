@@ -7,7 +7,6 @@ module Tarte
   end
 
   module BakedInAssociations
-    #LEDO: add finders? add verifications?
     
     def has_one_baked_in(association_name, methods = nil)
       names_constant = association_name.to_s.pluralize.upcase
@@ -22,7 +21,11 @@ module Tarte
         end
 
         def #{association_name}
-          #{names_constant}[#{association_name}_code]
+          if code = #{association_name}_code
+            #{names_constant}[code]
+          else
+            nil
+          end
         end
 
         def #{association_name}_was
@@ -42,9 +45,6 @@ module Tarte
         end
       EOV
       
-      #LEDO: Add a group options and quet methods and finders
-      
-      #LEDO: ADD scopes for finder methods
       methods[:names].each_with_index do |value, code|
         class_eval <<-EOV
           def #{value}
@@ -73,7 +73,7 @@ module Tarte
           #{names_constant}_GROUPS_CODES = #{hash_with_codes.inspect}
         EOV
         methods[:groups].each_key do |group|
-          send(:named_scope, "is_#{group}", :conditions => {"#{association_name}_code".to_sym => hash_with_codes[group]})
+          send(:named_scope, "is_#{group}", :conditions => {"#{association_name}_code" => hash_with_codes[group]})
         end
       end
       
