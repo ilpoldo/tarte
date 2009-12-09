@@ -33,8 +33,7 @@ module Tarte
           self.#{association_name}_code_changed?
         end
         
-        #LEDO: this group has to support group definitions
-        def #{association_name}_codes_for(names)
+        def self.#{association_name}_codes_for(names)
           if names.class == Array
             names.map{|n| #{names_constant}.index(n)}
           else
@@ -67,7 +66,7 @@ module Tarte
       end
       
       if methods[:groups]
-        hash_with_codes = methods[:groups].merge do |group, member_names|
+        hash_with_codes = methods[:groups].merge(methods[:groups]) do |group, member_names|
           member_names.map{|n| methods[:names].index(n)}
         end
         class_eval <<-EOV
@@ -105,8 +104,7 @@ module Tarte
           self.#{association_name}_mask_changed?
         end
         
-        #LEDO: this method has to support group definitions
-        def #{association_name}_mask_for(names)
+        def self.#{association_name}_mask_for(names)
           if names.class == Array
             new_mask = (names & #{names_constant}).map { |v| 2**#{names_constant}.index(v.to_sym) }.sum
             raise(Tarte::Errors::NotValidAssociationMask) if new_mask >= #{2**methods[:names].size}
@@ -130,7 +128,7 @@ module Tarte
       
       # Converts arrays of options into masks.
       if methods[:groups]
-        hash_with_masks = methods[:groups].merge do |group, member_names|
+        hash_with_masks = methods[:groups].merge(methods[:groups]) do |group, member_names|
           (member_names & methods[:names]).map { |m| 2**methods[:names].index(m.to_sym) }.sum
         end
         class_eval <<-EOV

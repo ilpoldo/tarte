@@ -3,13 +3,17 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 class HasOneStatus < ActiveRecord::Base
   attr_accessor :status_code
   [:status_code_changed?, :status_code_was].each { |m| define_method m, lambda {}}
-  has_one_baked_in :status, :names => [:red, :yellow, :green]
+  has_one_baked_in :status, :names => [:red, :yellow, :green], :groups => {:stop => [:red, :yellow]}
+  
+  validates_baked_in :status, :is => :stop
 end
 
 class HasManyIngredients < ActiveRecord::Base
   attr_accessor :ingredients_mask
   [:ingredients_mask_changed?, :ingredients_mask_was].each { |m| define_method m, lambda {}}
-  has_many_baked_in :ingredients, :names => [:fish, :chips, :sauce, :pudding]
+  has_many_baked_in :ingredients, :names => [:fish, :chips, :sauce, :pudding], :groups => {:"fish&chips" => [:fish, :chips]}
+  
+  validates_baked_in :ingredients, :matches => :"fish&chips"
 end
 
 describe Tarte, "accessors" do  
@@ -94,6 +98,16 @@ describe Tarte, "dirty associations" do
   end
 end
 
+describe Tarte, "grouping and group querying" do
+  it "should return an array of codes for a group of has_one values for an attribute" do
+    HasOneStatus.status_codes_for(:stop).should eql([0,1])
+  end
+  
+  it "should return mask for a group of has_many values for an attribute" do
+    HasManyIngredients.ingredients_mask_for(:"fish&chips").should eql(3)
+  end
+end
+
 describe Tarte, "finder methods/scopes" do
   it "should define scopes based on value gorups" do
     pending
@@ -102,6 +116,9 @@ end
 
 describe Tarte, "validations" do
   it "should allow to validate using value groups" do
-    pending
+    entry = HasOneStatus.new    
+    entry.errors.should_receive(:add)
+    entry.status = :green
+    entry.save
   end
 end
