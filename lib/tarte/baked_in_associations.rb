@@ -12,7 +12,7 @@ module Tarte
     def has_one_baked_in(association_name, methods = nil)
       names_constant = association_name.to_s.pluralize.upcase
       
-      class_variable_set(:@@has_one_baked_in_attributes) = (@@has_one_baked_in_attributes || []) << association_name 
+      write_inheritable_array(:has_one_baked_in_attributes, [association_name])
       
       class_eval <<-EOV
         #{names_constant} = #{methods[:names].inspect}
@@ -66,8 +66,13 @@ module Tarte
         EOV
       end
       
-      methods[:groups].each do |group, members|
-        
+      if methods[:groups]
+        hash_with_codes = methods[:groups].merge do |group, member_names|
+          member_names.map{|n| methods[:names].index(n)}
+        end
+        class_eval <<-EOV
+          #{names_constant}_GROUPS_CODES = #{hash_with_codes.inspect}
+        EOV
       end
       
     end
@@ -76,7 +81,7 @@ module Tarte
       names_constant = association_name.to_s.upcase
       methods[:verb] ||= :has
       
-      class_variable_set(:@@has_many_baked_in_attributes) = (@@has_many_baked_in_attributes || {}).merge!({association_name => methods[:verb]})
+      write_inheritable_hash(:has_many_baked_in_attributes, association_name => methods[:verb])
       
       class_eval <<-EOV
         #{names_constant} = #{methods[:names].inspect}
@@ -124,13 +129,14 @@ module Tarte
       end
       
       # Converts arrays of options into masks.
-      hash_with_masks = methods[:groups].merge do |group, member_names|
-        (member_names & methods[:names]).map { |m| 2**methods[:names].index(m.to_sym) }.sum
+      if methods[:groups]
+        hash_with_masks = methods[:groups].merge do |group, member_names|
+          (member_names & methods[:names]).map { |m| 2**methods[:names].index(m.to_sym) }.sum
+        end
+        class_eval <<-EOV
+          #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
+        EOV
       end
-      class_eval <<-EOV
-        #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
-      EOV
-      
     end
   end
 end

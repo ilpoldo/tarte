@@ -3,7 +3,7 @@ module Tarte
     def validates_baked_in (*attr_names)
       configuration = {:on => :save}
       configuration.update(attr_names.extract_options!)
-      codes_to_validate = attr_names.reject!{|attr_name| @@has_one_baked_in_attributes.include? attr_name}
+      codes_to_validate = attr_names.reject!{|attr_name| read_inheritable_array(:has_one_baked_in_attributes).include? attr_name}
       if codes_to_validate
         validates_code_of(codes_to_validate, configuration)
       else
@@ -37,7 +37,7 @@ module Tarte
       raise(ArgumentError, "An object with the method include? is required must be supplied as the :in option of the configuration hash") unless enum.respond_to?(:include?)
       
       validates_each(attr_names, configuration) do |record, attr_name, value|
-        verb = @@has_many_baked_in_attributes[attr_name]
+        verb = read_inheritable_hash(:has_many_baked_in_attributes)[attr_name]
         enum = configuration[verb] || configuration["#{verb}_not".to_sym]
         eql = configuration[:matches] || configuration[:does_not_match]
         
