@@ -16,14 +16,14 @@ module Tarte
       
       if configuration[:is]
         validates_each(attr_names, configuration) do |record, attr_name, value|
-          unless self.send("#{attr_name}_codes_for".to_sym, enum).include? value
-            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => record.send(attr_name))
+          unless self.send("#{attr_name}_codes_for".to_sym, enum).include? record.send("#{attr_name}_code")
+            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => value)
           end
         end
       elsif configuration[:is_not]
         validates_each(attr_names, configuration) do |record, attr_name, value|
-          if self.send("#{attr_name}_codes_for".to_sym, enum).include? value
-            record.errors.add(attr_name, :exclusion, :default => configuration[:message], :value => record.send(attr_name))
+          if self.send("#{attr_name}_codes_for".to_sym, enum).include? record.send("#{attr_name}_code")
+            record.errors.add(attr_name, :exclusion, :default => configuration[:message], :value => value)
           end
         end
       end
@@ -41,20 +41,20 @@ module Tarte
         eql = configuration[:matches] || configuration[:does_not_match]
         
         if configuration[:matches]
-          unless self.send("#{attr_name}_mask_for".to_sym, eql) == value
-            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => record.send(attr_name))
+          unless self.send("#{attr_name}_mask_for".to_sym, eql) == record.send("#{attr_name}_mask")
+            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => value)
           end
         elsif configuration[:does_not_match]
-          if self.send("#{attr_name}_mask_for".to_sym, eql) == value
-            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => record.send(attr_name))
+          if self.send("#{attr_name}_mask_for".to_sym, eql) == record.send("#{attr_name}_mask")
+            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => value)
           end
         elsif configuration[verb]
-          unless self.send("#{attr_name}_mask_for".to_sym, enum) & value > 0
-            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => record.send(attr_name))
+          unless self.send("#{attr_name}_mask_for".to_sym, enum) & record.send("#{attr_name}_mask") > 0
+            record.errors.add(attr_name, :inclusion, :default => configuration[:message], :value => value)
           end
         else
-          if send("#{attr_name}_mask_for".to_sym, enum) & value > 0
-            self.record.errors.add(attr_name, :exclusion, :default => configuration[:message], :value => record.send(attr_name))
+          if send("#{attr_name}_mask_for".to_sym, enum) & record.send("#{attr_name}_mask") > 0
+            self.record.errors.add(attr_name, :exclusion, :default => configuration[:message], :value => value)
           end
         end
       end

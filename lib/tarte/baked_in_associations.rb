@@ -72,6 +72,9 @@ module Tarte
         class_eval <<-EOV
           #{names_constant}_GROUPS_CODES = #{hash_with_codes.inspect}
         EOV
+        methods[:groups].each_key do |group|
+          send(:named_scope, "is_#{group}", :conditions => {"#{association_name}_code".to_sym => hash_with_codes[group]})
+        end
       end
       
     end
@@ -116,8 +119,6 @@ module Tarte
         end
       EOV
 
-      #LEDO: ADD scopes for finder methods
-      # :conditions => ["attribute_mask & ? > 0", 2**index]
       methods[:names].each_with_index do |value, index|
         class_eval <<-EOV
           def #{methods[:verb]}_#{value}?
@@ -134,6 +135,10 @@ module Tarte
         class_eval <<-EOV
           #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
         EOV
+        methods[:groups].each_key do |group|
+          send(:named_scope, "matching_#{group}", :conditions => {"#{association_name}_mask".to_sym => hash_with_masks[group]})
+          send(:named_scope, "with_#{group}", :conditions => ["#{association_name}_mask & ? > 0", hash_with_masks[group]])
+        end
       end
     end
   end

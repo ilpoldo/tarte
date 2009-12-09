@@ -1,19 +1,15 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 class HasOneStatus < ActiveRecord::Base
-  attr_accessor :status_code
-  [:status_code_changed?, :status_code_was].each { |m| define_method m, lambda {}}
   has_one_baked_in :status, :names => [:red, :yellow, :green], :groups => {:stop => [:red, :yellow]}
   
   validates_baked_in :status, :is => :stop
 end
 
 class HasManyIngredients < ActiveRecord::Base
-  attr_accessor :ingredients_mask
-  [:ingredients_mask_changed?, :ingredients_mask_was].each { |m| define_method m, lambda {}}
-  has_many_baked_in :ingredients, :names => [:fish, :chips, :sauce, :pudding], :groups => {:"fish&chips" => [:fish, :chips]}
+  has_many_baked_in :ingredients, :names => [:fish, :chips, :sauce, :pudding], :groups => {:fish_and_chips => [:fish, :chips]}
   
-  validates_baked_in :ingredients, :matches => :"fish&chips"
+  validates_baked_in :ingredients, :matches => :fish_and_chips
 end
 
 describe Tarte, "accessors" do  
@@ -104,21 +100,43 @@ describe Tarte, "grouping and group querying" do
   end
   
   it "should return mask for a group of has_many values for an attribute" do
-    HasManyIngredients.ingredients_mask_for(:"fish&chips").should eql(3)
+    HasManyIngredients.ingredients_mask_for(:fish_and_chips).should eql(3)
   end
 end
 
 describe Tarte, "finder methods/scopes" do
-  it "should define scopes based on value gorups" do
-    pending
+  it "should define scopes based on code gorups" do
+    entry = HasOneStatus.create!(:status => :red)
+    HasOneStatus.is_stop.last.should eql(entry)
+  end
+  
+  it "should define scopes based on mask gorups" do
+    entry = HasManyIngredients.create!(:ingredients => [:fish, :chips])
+    HasManyIngredients.matching_fish_and_chips.last.should eql(entry)
   end
 end
 
-describe Tarte, "validations" do
-  it "should allow to validate using value groups" do
+describe Tarte, "validations using groups" do
+  it "should validate has_one associations" do
     entry = HasOneStatus.new    
     entry.errors.should_receive(:add)
     entry.status = :green
     entry.save
   end
+  
+  it "should pass when defined as valid" do
+    HasOneStatus.create!('status' => :red)
+  end
+  
+  it "should validate has_many associations" do
+    entry = HasManyIngredients.new    
+    entry.errors.should_receive(:add)
+    entry.ingredients << :sauce
+    entry.save
+  end
+  
+  it "should pass when defined as valid" do
+    HasManyIngredients.create!('ingredients' => [:fish, :chips])
+  end
+  
 end
