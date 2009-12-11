@@ -71,6 +71,10 @@ module Tarte
         end
         class_eval <<-EOV
           #{names_constant}_GROUPS_CODES = #{hash_with_codes.inspect}
+          
+          def self.#{association_name}_condition(condition)
+            {:#{association_name}_code => #{names_constant}_GROUPS_CODES[condition]}
+          end
         EOV
         methods[:groups].each_key do |group|
           send(:named_scope, "is_#{group}", :conditions => {"#{association_name}_code" => hash_with_codes[group]})
@@ -138,6 +142,10 @@ module Tarte
         end
         class_eval <<-EOV
           #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
+          
+          def self.#{association_name}_condition(condition)
+            {:#{association_name}_mask => #{names_constant}_GROUPS_MASKS[condition]}
+          end
         EOV
         methods[:groups].each_key do |group|
           send(:named_scope, "matching_#{group}", :conditions => {"#{association_name}_mask".to_sym => hash_with_masks[group]})
