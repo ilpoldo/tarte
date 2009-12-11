@@ -89,7 +89,11 @@ module Tarte
         #{names_constant} = #{methods[:names].inspect}
       
         def #{association_name}=(values)
-          new_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v) }.sum
+          if values.class == Array
+            new_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v) }.sum
+          else
+            new_mask = #{names_constant}_GROUPS_MASKS[values]
+          end
           raise(Tarte::Errors::NotValidAssociationMask) if new_mask >= #{2**methods[:names].size}
           
           self.#{association_name}_mask = new_mask

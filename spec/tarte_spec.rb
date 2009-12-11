@@ -38,6 +38,14 @@ describe Tarte, "accessors" do
     entry.should_receive(:ingredients_mask=).with(3)
     entry.ingredients = [:fish, :chips]
   end
+  
+  it "has an accessor for the has_many that supports groups" do
+    entry = HasManyIngredients.new
+    
+    entry.ingredients = :fish_and_chips
+    entry.ingredients.should eql([:fish, :chips])
+    
+  end
 end
 
 describe Tarte, "query methods" do
