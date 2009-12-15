@@ -17,7 +17,11 @@ module Tarte
         #{names_constant} = #{methods[:names].inspect}
 
         def #{association_name}=(value)
-          self.#{association_name}_code = #{names_constant}.index(value)
+          if value
+            self.#{association_name}_code = #{names_constant}.index(value)
+          else
+            self.#{association_name}_code = nil
+          end
         end
 
         def #{association_name}
@@ -49,6 +53,7 @@ module Tarte
         class_eval <<-EOV
           def #{value}
             self.#{association_name}_code = #{code}
+            self
           end
 
           def #{value}?
