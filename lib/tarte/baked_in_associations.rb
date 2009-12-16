@@ -148,6 +148,7 @@ module Tarte
         class_eval <<-EOV
           #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
           
+          # Use this method to build scopes
           def self.#{association_name}_condition(condition)
             {:#{association_name}_mask => #{names_constant}_GROUPS_MASKS[condition]}
           end
@@ -155,6 +156,13 @@ module Tarte
         methods[:groups].each_key do |group|
           send(:named_scope, "matching_#{group}", :conditions => {"#{association_name}_mask".to_sym => hash_with_masks[group]})
           send(:named_scope, "with_#{group}", :conditions => ["#{association_name}_mask & ? > 0", hash_with_masks[group]])
+          
+          class_eval <<-EOV
+            def self.#{association_name}_matches_#{group}?
+              self.#{association_name}_mask == #{names_constant}_GROUPS_MASKS[#{group}]
+            end
+          EOV
+          
         end
       end
     end
