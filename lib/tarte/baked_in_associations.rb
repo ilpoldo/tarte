@@ -145,6 +145,7 @@ module Tarte
         hash_with_masks = methods[:groups].merge(methods[:groups]) do |group, member_names|
           (member_names & methods[:names]).map { |m| 2**methods[:names].index(m.to_sym) }.sum
         end
+        
         class_eval <<-EOV
           #{names_constant}_GROUPS_MASKS = #{hash_with_masks.inspect}
           
@@ -153,17 +154,18 @@ module Tarte
             {:#{association_name}_mask => #{names_constant}_GROUPS_MASKS[condition]}
           end
         EOV
+        
         methods[:groups].each_key do |group|
           send(:named_scope, "matching_#{group}", :conditions => {"#{association_name}_mask".to_sym => hash_with_masks[group]})
           send(:named_scope, "with_#{group}", :conditions => ["#{association_name}_mask & ? > 0", hash_with_masks[group]])
           
           class_eval <<-EOV
-            def self.#{association_name}_matches_#{group}?
-              self.#{association_name}_mask == #{names_constant}_GROUPS_MASKS[#{group}]
+            def #{association_name}_matches_#{group}?
+              self.#{association_name}_mask == #{names_constant}_GROUPS_MASKS[:#{group}]
             end
           EOV
-          
         end
+        
       end
     end
   end
