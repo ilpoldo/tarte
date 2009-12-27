@@ -98,9 +98,11 @@ module Tarte
         #{names_constant} = #{methods[:names].inspect}
       
         def #{association_name}=(values)
+          return nil unless values
+          
           if values.class == Array
             new_mask = (values & #{names_constant}).map { |v| 2**#{names_constant}.index(v) }.sum
-          else
+          else values
             new_mask = #{names_constant}_GROUPS_MASKS[values]
           end
           raise(Tarte::Errors::NotValidAssociationMask) if new_mask >= #{2**methods[:names].size}
@@ -153,6 +155,11 @@ module Tarte
           def self.#{association_name}_condition(condition)
             {:#{association_name}_mask => #{names_constant}_GROUPS_MASKS[condition]}
           end
+          
+          def #{association_name}_matches(group)
+            self.#{association_name}_mask == #{names_constant}_GROUPS_MASKS[group]
+          end
+          
         EOV
         
         methods[:groups].each_key do |group|
