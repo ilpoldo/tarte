@@ -1,6 +1,6 @@
 require 'rubygems'
-require 'activesupport'
-require 'activerecord'
+require 'active_support'
+require 'active_record'
 
 TEST_DATABASE_FILE = File.join(File.dirname(__FILE__), '..', 'test.sqlite3')
  
