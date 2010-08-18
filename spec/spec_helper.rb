@@ -1,6 +1,6 @@
-require 'rubygems'
 require 'active_support'
 require 'active_record'
+require 'rspec'
 
 TEST_DATABASE_FILE = File.join(File.dirname(__FILE__), '..', 'test.sqlite3')
  
@@ -24,8 +24,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 # end
 
 require 'tarte'
-require 'spec'
-require 'spec/autorun'
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.

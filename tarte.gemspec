@@ -5,12 +5,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{tarte}
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Leandro Pedroni"]
-  s.date = %q{2009-12-05}
-  s.description = %q{TODO: longer description of your gem}
+  s.date = %q{2010-05-20}
+  s.description = %q{Provides a lot of helper methods and uses integer indexes or bitmasks to store in a record an association to a predetermined set of symbols.}
   s.email = %q{ilpoldo@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -26,6 +26,9 @@ Gem::Specification.new do |s|
      "init.rb",
      "lib/tarte.rb",
      "lib/tarte/baked_in_associations.rb",
+     "lib/tarte/baked_in_validation_helpers.rb",
+     "spec/debug.log",
+     "spec/schema.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
      "spec/tarte_spec.rb",
@@ -34,10 +37,11 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/ilpoldo/tarte}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
-  s.summary = %q{TODO: one-line summary of your gem}
+  s.rubygems_version = %q{1.3.6}
+  s.summary = %q{Baked in ActiveRecord Associations}
   s.test_files = [
-    "spec/spec_helper.rb",
+    "spec/schema.rb",
+     "spec/spec_helper.rb",
      "spec/tarte_spec.rb"
   ]
 
