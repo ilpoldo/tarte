@@ -82,8 +82,7 @@ module Tarte
           end
         EOV
         methods[:groups].each_key do |group|
-          send(:scope, "is_#{group}", 
-                       send(:where, ("#{association_name}_code" => hash_with_codes[group])))
+          send(:scope, "is_#{group}", send(:where, "#{association_name}_code =", hash_with_codes[group]))
         end
       end
       
@@ -164,8 +163,8 @@ module Tarte
         EOV
         
         methods[:groups].each_key do |group|
-          send(:scope, "matching_#{group}", send(:where, "#{association_name}_mask".to_sym => hash_with_masks[group]))
-          send(:scope, "with_#{group}", send(:where, "#{association_name}_mask & ? > 0", hash_with_masks[group]) )
+          send(:scope, "matching_#{group}", send(:where, "#{association_name}_mask =", hash_with_masks[group]))
+          send(:scope, "with_#{group}", send(:where, "#{association_name}_mask & ? > 0", hash_with_masks[group]))
           
           class_eval <<-EOV
             def #{association_name}_matches_#{group}?
