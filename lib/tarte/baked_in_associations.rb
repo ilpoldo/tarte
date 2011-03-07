@@ -18,7 +18,7 @@ module Tarte
 
         def #{association_name}=(value)
           if value
-            self.#{association_name}_code = #{names_constant}.index(value)
+            self.#{association_name}_code = #{names_constant}.index(value.to_sym)
           else
             self.#{association_name}_code = nil
           end
@@ -82,7 +82,7 @@ module Tarte
           end
         EOV
         methods[:groups].each_key do |group|
-          send(:scope, "is_#{group}", send(:where, "#{association_name}_code =", hash_with_codes[group]))
+          send(:scope, "is_#{group}", send(:where, "#{association_name}_code IN (?)", hash_with_codes[group]))
         end
       end
       
@@ -163,7 +163,7 @@ module Tarte
         EOV
         
         methods[:groups].each_key do |group|
-          send(:scope, "matching_#{group}", send(:where, "#{association_name}_mask =", hash_with_masks[group]))
+          send(:scope, "matching_#{group}", send(:where, "#{association_name}_mask = ?", hash_with_masks[group]))
           send(:scope, "with_#{group}", send(:where, "#{association_name}_mask & ? > 0", hash_with_masks[group]))
           
           class_eval <<-EOV
